@@ -1,0 +1,54 @@
+org: sinpatrones
+console: true
+service: aws-lambda-api-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  profile: deploy-aws
+  region: us-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-west-2:693866078430:table/ClientTable
+
+functions:
+  create-client:
+    handler: src/handlers/clients.createClient
+    events:
+      - httpApi:
+          method: post
+          path: /crearcliente
+
+  kpideclientes:
+    handler: src/handlers/clients.kpiClientsHandler
+    events:
+      - httpApi:
+          method: get
+          path: /kpideclientes
+
+  listclientes:
+    handler: src/handlers/clients.clientsListHandler
+    events:
+      - httpApi:
+          method: get
+          path: /listclientes
+
+resources:
+  Resources:
+    ClientTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ClientTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
